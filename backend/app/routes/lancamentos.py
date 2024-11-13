@@ -1,24 +1,16 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from backend.app.models.lancamento import Lancamento
-from backend.app.schemas.lancamento import lancamento_schema, lancamentos_schema
-from backend.app.services.lancamento_service import criar_lancamento, atualizar_lancamento, deletar_lancamento
-from backend.app import db
+from ..models.lancamento import Lancamento
+from ..schemas.lancamento import lancamento_schema, lancamentos_schema
+from ..services.lancamento_service import criar_lancamento, atualizar_lancamento, deletar_lancamento
 
 bp = Blueprint('lancamentos', __name__, url_prefix='/api/lancamentos')
 
 @bp.route('', methods=['GET'])
 @jwt_required()
 def listar_lancamentos():
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 20, type=int)
-    lancamentos = Lancamento.query.paginate(page=page, per_page=per_page, error_out=False)
-    return jsonify({
-        'items': lancamentos_schema.dump(lancamentos.items),
-        'total': lancamentos.total,
-        'pages': lancamentos.pages,
-        'page': page
-    }), 200
+    lancamentos = Lancamento.query.all()
+    return jsonify(lancamentos_schema.dump(lancamentos)), 200
 
 @bp.route('', methods=['POST'])
 @jwt_required()
@@ -63,13 +55,5 @@ def filtrar_lancamentos():
     if categoria:
         query = query.filter(Lancamento.categoria.has(nome=categoria))
 
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 20, type=int)
-    lancamentos = query.paginate(page=page, per_page=per_page, error_out=False)
-
-    return jsonify({
-        'items': lancamentos_schema.dump(lancamentos.items),
-        'total': lancamentos.total,
-        'pages': lancamentos.pages,
-        'page': page
-    }), 200
+    lancamentos = query.all()
+    return jsonify(lancamentos_schema.dump(lancamentos)), 200

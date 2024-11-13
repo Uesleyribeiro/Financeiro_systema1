@@ -1,19 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Navbar: React.FC = () => {
+function Navbar() {
   return (
     <nav>
       <ul>
-        <li><Link to="/">Dashboard</Link></li>
-        <li><Link to="/lancamentos">Lançamentos</Link></li>
-        <li><Link to="/categorias">Categorias</Link></li>
-        <li><Link to="/centros-custo">Centros de Custo</Link></li>
+        <li><Link to="/">Home</Link></li>
+        <li><Link to="/empresas">Empresas</Link></li>
+        <li><Link to="/plano-contas">Plano de Contas</Link></li>
+        <li><Link to="/transacoes">Transações</Link></li>
         <li><Link to="/relatorios">Relatórios</Link></li>
-        <li><Link to="/orcamento">Orçamento</Link></li>
       </ul>
     </nav>
   );
-};
+}
 
 export default Navbar;

@@ -1,51 +1,32 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User
-from . import db
+from backend.app.models.user import User
+from backend.app import db
 
-bp = Blueprint('auth', __name__)
+bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 @bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-
-    if not email or not password:
-        return jsonify({"message": "Email e senha são obrigatórios"}), 400
-
-    existing_user = User.query.filter_by(email=email).first()
-    if existing_user:
-        return jsonify({"message": "Usuário já existe"}), 400
-
-    user = User(email=email)
-    user.set_password(password)
-
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({"msg": "Username already exists"}), 400
+    user = User(username=data['username'], password=generate_password_hash(data['password']))
     db.session.add(user)
     db.session.commit()
-
-    return jsonify({"message": "Usuário registrado com sucesso"}), 201
+    return jsonify({"msg": "User created successfully"}), 201
 
 @bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-
-    user = User.query.filter_by(email=email).first()
-    if not user or not user.check_password(password):
-        return jsonify({"message": "Email ou senha inválidos"}), 401
-
-    access_token = create_access_token(identity=user.id)
-    return jsonify({"access_token": access_token}), 200
+    user = User.query.filter_by(username=data['username']).first()
+    if user and check_password_hash(user.password, data['password']):
+        access_token = create_access_token(identity=user.id)
+        return jsonify(access_token=access_token), 200
+    return jsonify({"msg": "Bad username or password"}), 401
 
 @bp.route('/protected', methods=['GET'])
 @jwt_required()
 def protected():
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
-    if user:
-        return jsonify({"message": f"Bem-vindo, usuário {user.email}!"}), 200
-    else:
-        return jsonify({"message": "Usuário não encontrado"}), 404
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200

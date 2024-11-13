@@ -9,7 +9,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 
-
 db = SQLAlchemy()
 migrate = Migrate()
 ma = Marshmallow()
@@ -18,8 +17,6 @@ jwt = JWTManager()
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    from .error_handlers import register_error_handlers
-    register_error_handlers(app)
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -27,17 +24,7 @@ def create_app(config_class=Config):
     jwt.init_app(app)
     CORS(app)
 
-    from .routes import (
-        lancamentos,
-        categorias,
-        relatorios,
-        extratos,
-        centros_custo,
-        dashboard,
-        orcamento,
-        auth
-    )
-
+    from .routes import lancamentos, categorias, relatorios, extratos, centros_custo, dashboard, orcamento, auth
     app.register_blueprint(lancamentos.bp)
     app.register_blueprint(categorias.bp)
     app.register_blueprint(relatorios.bp)
@@ -47,11 +34,6 @@ def create_app(config_class=Config):
     app.register_blueprint(orcamento.bp)
     app.register_blueprint(auth.bp)
 
-    @app.route('/')
-    def home():
-        return "Bem-vindo ao Sistema Financeiro"
-
-    # Configuração de logging
     if not app.debug and not app.testing:
         if not os.path.exists('logs'):
             os.mkdir('logs')
@@ -60,8 +42,16 @@ def create_app(config_class=Config):
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
         file_handler.setLevel(logging.INFO)
         app.logger.addHandler(file_handler)
-
         app.logger.setLevel(logging.INFO)
         app.logger.info('Financeiro startup')
+
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return jsonify({"error": "Not Found"}), 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        db.session.rollback()
+        return jsonify({"error": "Internal Server Error"}), 500
 
     return app

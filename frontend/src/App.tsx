@@ -1,29 +1,27 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Dashboard from './pages/Dashboard';
-import Lancamentos from './pages/Lancamentos';
-import Categorias from './pages/Categorias';
-import CentrosCusto from './pages/CentrosCusto';
+import Home from './pages/Home';
+import Empresas from './pages/Empresas';
+import PlanoContas from './pages/PlanoContas';
+import Transacoes from './pages/Transacoes';
 import Relatorios from './pages/Relatorios';
-import Orcamento from './pages/Orcamento';
 
-const App: React.FC = () => {
+function App() {
   return (
     <Router>
       <div className="App">
         <Navbar />
         <Switch>
-          <Route exact path="/" component={Dashboard} />
-          <Route path="/lancamentos" component={Lancamentos} />
-          <Route path="/categorias" component={Categorias} />
-          <Route path="/centros-custo" component={CentrosCusto} />
+          <Route exact path="/" component={Home} />
+          <Route path="/empresas" component={Empresas} />
+          <Route path="/plano-contas" component={PlanoContas} />
+          <Route path="/transacoes" component={Transacoes} />
           <Route path="/relatorios" component={Relatorios} />
-          <Route path="/orcamento" component={Orcamento} />
         </Switch>
       </div>
     </Router>
   );
-};
+}
 
 export default App;
