@@ -199,4 +199,5 @@ def internal_error(error):
     return jsonify({"error": "Erro interno do servidor"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() in ['true', '1', 't']
+    app.run(debug=debug_mode)
