@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app as app
 from backend.app.services.extrato_service import importar_extrato
 from backend.app.schemas.lancamento import lancamentos_schema
 
@@ -23,6 +23,7 @@ def importar(conta_bancaria_id):
                 'lancamentos': lancamentos_schema.dump(lancamentos)
             }), 201
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            app.logger.error('An error occurred while importing extrato', exc_info=True)
+            return jsonify({'error': 'An internal error has occurred!'}), 500
     else:
         return jsonify({'error': 'Formato de arquivo inválido. Por favor, envie um arquivo CSV.'}), 400
